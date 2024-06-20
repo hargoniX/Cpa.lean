@@ -90,19 +90,3 @@ macro_rules
 | `([stmnt| break]) => `(Stmnt.break)
 | `([stmnt| continue]) => `(Stmnt.continue)
 | `([stmnt| reach_error()]) => `(Stmnt.reachError)
-
-#check [stmnt|
-  i = 0
-  j = nondet()
-  while (i < 1000) {
-    if (i == 47) {
-      j = j * 2 - 1
-      reach_error()
-      break
-    } else {
-      i = i + 1
-      continue
-    }
-    i = i - 1
-  }
-]
