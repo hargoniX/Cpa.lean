@@ -21,6 +21,7 @@ deriving Repr, Hashable, DecidableEq
 
 inductive BExp where
 | const (b : Bool)
+| not (e : BExp)
 | bin (lhs : AExp) (op : BOp) (rhs : AExp)
 deriving Repr, Hashable, DecidableEq
 
@@ -51,6 +52,7 @@ syntax aexp " + " aexp : aexp
 syntax aexp " - " aexp : aexp
 syntax aexp " * " aexp : aexp
 syntax aexp " / " aexp : aexp
+syntax "(" aexp ")" : aexp
 syntax "nondet" "(" ")" : aexp
 
 
@@ -81,6 +83,7 @@ macro_rules
 | `([aexp| $lhs:aexp * $rhs:aexp]) => `(AExp.bin [aexp| $lhs] AOp.mul [aexp| $rhs])
 | `([aexp| $lhs:aexp / $rhs:aexp]) => `(AExp.bin [aexp| $lhs] AOp.div [aexp| $rhs])
 | `([aexp| nondet()]) => `(AExp.nondet)
+| `([aexp| ($e:aexp)]) => `([aexp| $e])
 | `([stmnt| $i:ident = $e:aexp]) => `(Stmnt.assign $(quote i.getId.toString) [aexp| $e])
 | `([stmnt| $s1:stmnt $s2:stmnt]) => `(Stmnt.seq [stmnt| $s1] [stmnt| $s2])
 | `([stmnt| if ($discr:bexp) { $pos:stmnt } else { $neg:stmnt }]) =>

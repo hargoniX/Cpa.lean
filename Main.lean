@@ -11,6 +11,7 @@ def AExp.countNames (e : AExp) : Nat :=
 def BExp.countNames (e : BExp) : Nat :=
   match e with
   | .const .. => 0
+  | .not e => e.countNames
   | .bin lhs _ rhs => lhs.countNames + rhs.countNames
 
 def Stmnt.countNames (s : Stmnt) : Nat :=
@@ -26,7 +27,7 @@ def Stmnt.countNames (s : Stmnt) : Nat :=
   j = nondet()
   while (i < 1000) {
     if (i == 47) {
-      j = j * 2 - 1
+      j = (j * 2) - 1
       reach_error()
       break
     } else {
@@ -38,6 +39,22 @@ def Stmnt.countNames (s : Stmnt) : Nat :=
 ]
 
 end CountNames
+
+#eval CFA.ofAST [stmnt|
+  i = 0
+  j = nondet()
+  while (i < 1000) {
+    if (i == 47) {
+      j = (j * 2) - 1
+      reach_error()
+      break
+    } else {
+      i = i + 1
+      continue
+    }
+    i = i - 1
+  }
+]
 
 def main : IO Unit :=
   IO.println s!"Hello, world!"
