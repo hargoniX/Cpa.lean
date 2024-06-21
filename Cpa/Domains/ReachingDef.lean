@@ -13,7 +13,7 @@ structure Definition where
 deriving Repr, Hashable, DecidableEq, Ord
 
 instance : ToString Definition where
-  toString d := s!"{d.var} : {d.entry} to {d.exit}"
+  toString d := s!"{d.var} @ {d.entry}-{d.exit}"
 
 structure ReachedDefinitions where
   defs : RBMap Definition Unit Ord.compare := {}
@@ -26,7 +26,7 @@ instance : DecidableRel (@LE.le ReachedDefinitions _) :=
   fun lhs rhs => inferInstanceAs (Decidable (lhs.defs.all (fun d _ => rhs.defs.contains d)))
 
 instance : BEq ReachedDefinitions where
-  beq lhs rhs := lhs ≤ rhs && lhs.defs.size == rhs.defs.size
+  beq lhs rhs := lhs ≤ rhs && rhs ≥ lhs
 
 instance : Domain ReachedDefinitions where
   meet lhs rhs := ⟨rhs.defs.fold (init := lhs.defs) RBMap.insert⟩
