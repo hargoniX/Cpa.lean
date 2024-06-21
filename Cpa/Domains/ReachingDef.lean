@@ -29,15 +29,14 @@ instance : Domain ReachedDefinitions where
   meet lhs rhs := ⟨rhs.defs.fold (init := lhs.defs) RBMap.insert⟩
 
 instance : Transfer ReachedDefinitions where
-  transfer r entry e := Id.run do
+  transfer r entry e := do
     match e.instr with
-    | .assumption .. | .nop => r
+    | .assumption .. | .nop => return r
     | .statement var _ =>
       let mut ⟨defs⟩ := r
       for (varDef, _) in r.defs do
         if varDef.var == var then
           defs := defs.erase varDef
-          break
       defs := defs.insert ⟨var, entry, e.target⟩ ()
       return ⟨defs⟩
 

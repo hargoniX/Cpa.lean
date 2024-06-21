@@ -19,6 +19,9 @@ instance : Domain (Combined α β) where
   meet lhs rhs := ⟨Domain.meet lhs.left rhs.left, Domain.meet lhs.right rhs.right⟩
 
 instance [Transfer α] [Transfer β] : Transfer (Combined α β) where
-  transfer c l e := ⟨Transfer.transfer c.left l e, Transfer.transfer c.right l e⟩
+  transfer c l e := do
+    let lres ← Transfer.transfer c.left l e
+    let rres ← Transfer.transfer c.right l e
+    return ⟨lres, rres⟩
 
 end Domain
