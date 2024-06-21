@@ -64,18 +64,16 @@ def valueExample : IO Unit := do
   match res with
   | .ok cfa =>
     -- This is the program we are working on
-    IO.println s!"Analyzing CFA:\n{cfa}\n"
+    IO.println s!"# Analyzing CFA:\n{cfa}\n"
 
     -- This is data flow analysis with constant propagation
     let res := Cpa.valueDataFlowAnalysis cfa
-    IO.println s!"Value DFA:\n{res}\n"
+    IO.println s!"## Value DFA:\n{res}\n"
 
     -- This is model checking analysis with constant propagation
     let res := Cpa.valueModelChecking cfa
-    IO.println s!"Value MC:\n{res}\n"
+    IO.println s!"## Value MC:\n{res}\n"
   | .error e => throw <| .userError s!"Error while constructing CFA: {e}"
-
-#eval valueExample
 
 def prog_my_example : Stmnt := [stmnt|
   i = 0
@@ -93,28 +91,30 @@ def prog_my_example : Stmnt := [stmnt|
   }
 ]
 
-
 open Domain in
-def main : IO Unit := do
+def reachDefExample : IO Unit := do
   let res := CFA.ofAST prog_my_example
   match res with
   | .ok cfa =>
     -- This is the program we are working on
-    IO.println s!"Analyzing CFA:\n{cfa}\n"
+    IO.println s!"# Analyzing CFA:\n{cfa}\n"
 
     -- This is syntactic analysis of reachable variables
     let res := Cpa.reachingDefinitions cfa
-    IO.println s!"Reaching Definitions:\n{res}\n"
+    IO.println s!"## Reaching Definitions:\n{res}\n"
 
     -- This is value analysis with constant propagation
     let res := Cpa.valueDataFlowAnalysis cfa
-    IO.println s!"Value DFA:\n{res}\n"
+    IO.println s!"## Value DFA:\n{res}\n"
 
     -- We can inform reaching definitions analysis using value analysis.
     -- This allows us to figure out that because certain locations are not reachable, they
     -- do not have reaching variable definitions
     let res := Cpa.dataFlowAnalysis (d := Combined ReachedDefinitions ValueAssignment) cfa ⟨{}, {}⟩
-    IO.println s!"Reaching Definitions + Value DFA:\n{res}\n"
+    IO.println s!"## Reaching Definitions + Value DFA:\n{res}\n"
   | .error e => throw <| .userError s!"Error while constructing CFA: {e}"
 
-#eval main
+
+def main : IO Unit := do
+  valueExample
+  reachDefExample
