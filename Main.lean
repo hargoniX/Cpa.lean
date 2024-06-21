@@ -57,27 +57,36 @@ end CountNames
 ]
 
 open Domain in
-def main : IO Unit :=
+def main : IO Unit := do
+  --let res := CFA.ofAST [stmnt|
+  --  i = 0
+  --  j = nondet()
+  --  while (i < 1000) {
+  --    if (i == 47) {
+  --      j = (j * 2) - 1
+  --      reach_error()
+  --      break
+  --    } else {
+  --      i = i + 1
+  --      continue
+  --    }
+  --    i = i - 1
+  --  }
+  --]
   let res := CFA.ofAST [stmnt|
     i = 0
-    j = nondet()
-    while (i < 1000) {
-      if (i == 47) {
-        j = (j * 2) - 1
-        reach_error()
-        break
-      } else {
-        i = i + 1
-        continue
-      }
-      i = i - 1
+    if (i == 0) {
+      i = 1
+    } else {
+      j = 1
     }
+    k = 1
   ]
   match res with
   | .ok cfa =>
-    let cfg := Cpa.Config.modelChecking ReachedDefinitions cfa
-    let res := Cpa.run cfg ⟨{}⟩
-    IO.println s!"Result:\n{repr res}"
+    IO.println s!"Analyzing CFA:\n{repr cfa}"
+    let res := Cpa.reachingDefinitions cfa
+    IO.println s!"Reaching Definitions:\n{repr res}"
   | .error e => throw <| .userError s!"Error while constructing CFA: {e}"
 
 #eval main

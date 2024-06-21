@@ -1,8 +1,5 @@
 import Cpa.Cfa
-import Cpa.Domains.Def
-import Cpa.Domains.Combination
-import Cpa.Domains.Location
-import Lean.Data.HashMap
+import Cpa.Domains
 
 namespace Cpa
 
@@ -37,7 +34,10 @@ where
             let e_new := config.merge e' e''
             if e_new != e'' then
               waitlist := e_new :: waitlist
-              reached := reached.push e_new
+              if let some e''_idx := reached.findIdx? (· == e'') then
+                reached := reached.set! e''_idx e_new
+              else
+                reached := reached.push e_new
           if !config.stop e' reached then
               waitlist := e' :: waitlist
               reached := reached.push e'
@@ -54,18 +54,33 @@ def defaultStop (state : Combined Location d) (reached : Array (Combined Locatio
   let ⟨l, e⟩ := state
   reached.any (fun ⟨l', e'⟩ => l' = l ∧ e ≤ e')
 
-def Config.modelChecking (d : Type) [LE d] [DecidableRel (@LE.le d _)] (cfa : CFA) : Config (Combined Location d) :=
+namespace Config
+
+def modelChecking (d : Type) [LE d] [DecidableRel (@LE.le d _)] (cfa : CFA) : Config (Combined Location d) :=
   {
     merge := mcMerge,
     stop := defaultStop,
     cfa := cfa
   }
 
-def Config.dataFlowAnalysis (d : Type) [LE d] [DecidableRel (@LE.le d _)] [Domain d] (cfa : CFA) : Config (Combined Location d) :=
+def dataFlowAnalysis (d : Type) [LE d] [DecidableRel (@LE.le d _)] [Domain d] (cfa : CFA) : Config (Combined Location d) :=
   {
     merge := dfaMerge,
     stop := defaultStop,
     cfa := cfa
   }
+
+end Config
+
+def modelChecking (cfa : CFA) (e0 : d) : Array (Combined Location d) :=
+  let cfg := Config.modelChecking d cfa
+  Cpa.run cfg e0
+
+def dataFlowAnalysis (cfa : CFA) (e0 : d) : Array (Combined Location d) :=
+  let cfg := Config.dataFlowAnalysis d cfa
+  Cpa.run cfg e0
+
+def reachingDefinitions (cfa : CFA) : Array (Combined Location ReachedDefinitions) :=
+  dataFlowAnalysis cfa {}
 
 end Cpa
