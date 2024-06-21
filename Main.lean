@@ -44,6 +44,39 @@ end CountNames
 
 #eval toString <| CFA.ofAST prog_1_1
 
+def prog_mc_example : Stmnt := [stmnt|
+  if (i == 0) {
+    i = 0
+  } else {
+    i = 1
+  }
+
+  if (i < 2) {
+    i = 2
+  } else {
+    reach_error()
+  }
+]
+
+open Domain in
+def valueExample : IO Unit := do
+  let res := CFA.ofAST prog_mc_example
+  match res with
+  | .ok cfa =>
+    -- This is the program we are working on
+    IO.println s!"Analyzing CFA:\n{cfa}\n"
+
+    -- This is data flow analysis with constant propagation
+    let res := Cpa.valueDataFlowAnalysis cfa
+    IO.println s!"Value DFA:\n{res}\n"
+
+    -- This is model checking analysis with constant propagation
+    let res := Cpa.valueModelChecking cfa
+    IO.println s!"Value MC:\n{res}\n"
+  | .error e => throw <| .userError s!"Error while constructing CFA: {e}"
+
+#eval valueExample
+
 def prog_my_example : Stmnt := [stmnt|
   i = 0
   if (i == j) {
@@ -59,6 +92,7 @@ def prog_my_example : Stmnt := [stmnt|
     reach_error()
   }
 ]
+
 
 open Domain in
 def main : IO Unit := do
