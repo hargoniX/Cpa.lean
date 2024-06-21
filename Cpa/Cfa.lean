@@ -7,21 +7,21 @@ inductive Instruction where
 | assumption (b : BExp)
 | statement (var : String) (e : AExp)
 | nop
-deriving Repr, Hashable, DecidableEq
+deriving Repr, Hashable, DecidableEq, Inhabited
 
 structure Edge where
   instr : Instruction
   target : Nat
-deriving Repr, Hashable, DecidableEq
+deriving Repr, Hashable, DecidableEq, Inhabited
 
 structure CFANode where
   isError : Bool
   successors : Array Edge
-deriving Repr, Hashable, DecidableEq
+deriving Repr, Hashable, DecidableEq, Inhabited
 
 structure CFA where
   graph : Array CFANode := #[]
-deriving Repr, Hashable, DecidableEq
+deriving Repr, Hashable, DecidableEq, Inhabited
 
 namespace CFA
 
@@ -38,12 +38,19 @@ def addEdge (cfa : CFA) (entry : Nat) (instr : Instruction) (exit : Nat) : CFA :
           (fun node => { node with successors := node.successors.push ⟨instr, exit⟩ })
   }
 
+
+def getEdges (cfa : CFA) (idx : Nat) : Array Edge :=
+  cfa.graph[idx]!.successors
+
+def isError (cfa : CFA) (idx : Nat) : Bool :=
+  cfa.graph[idx]!.isError
+
+namespace ofAST
+
 structure Result where
   entry : Nat
   exit? : Option Nat
 deriving Repr, Hashable, DecidableEq
-
-namespace ofAST
 
 structure LoopInfo where
   loopEntry : Nat
