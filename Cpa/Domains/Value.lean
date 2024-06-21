@@ -64,7 +64,10 @@ instance : DecidableRel (@LE.le ValueAssignment _) :=
   fun lhs rhs => inferInstanceAs (Decidable (lhs.vars.all (fun var val => val ≤ rhs.find var)))
 
 instance : BEq ValueAssignment where
-  beq lhs rhs := lhs ≤ rhs && lhs.vars.size == rhs.vars.size
+  beq lhs rhs :=
+    lhs.vars.all (fun var val => val == rhs.find var)
+      &&
+    rhs.vars.all (fun var val => val == lhs.find var)
 
 instance : Domain ValueAssignment where
   meet lhs rhs :=
@@ -77,7 +80,7 @@ instance : Domain ValueAssignment where
         acc
     lhs.vars.fold (init := {}) folder
 
-instance : Transfer ValueAssignment where 
+instance : Transfer ValueAssignment where
   transfer assign _ e := do
     match e.instr with
     | .nop => return assign
