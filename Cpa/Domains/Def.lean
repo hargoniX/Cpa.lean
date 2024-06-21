@@ -33,3 +33,9 @@ instance : Monad FlatLattice where
     match mx with
     | .top => .top
     | .val x => f x
+
+instance [ToString α] : ToString (FlatLattice α) where
+  toString l :=
+    match l with
+    | .top => "⊤"
+    | .val x => toString x

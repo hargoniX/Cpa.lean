@@ -12,6 +12,9 @@ structure Definition where
   exit : Nat
 deriving Repr, Hashable, DecidableEq, Ord
 
+instance : ToString Definition where
+  toString d := s!"{d.var} : {d.entry} to {d.exit}"
+
 structure ReachedDefinitions where
   defs : RBMap Definition Unit Ord.compare := {}
 deriving Repr
@@ -39,5 +42,8 @@ instance : Transfer ReachedDefinitions where
           defs := defs.erase varDef
       defs := defs.insert ⟨var, entry, e.target⟩ ()
       return ⟨defs⟩
+
+instance : ToString ReachedDefinitions where
+  toString reached := reached.defs.fold (init := "[") (fun acc d _ => acc ++ s!"{d}, ") ++ "]"
 
 end Domain

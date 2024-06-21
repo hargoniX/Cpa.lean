@@ -42,7 +42,7 @@ def Stmnt.countNames (s : Stmnt) : Nat :=
 
 end CountNames
 
-#eval CFA.ofAST prog_1_1
+#eval toString <| CFA.ofAST prog_1_1
 
 def prog_my_example : Stmnt := [stmnt|
   i = 0
@@ -65,11 +65,22 @@ def main : IO Unit := do
   let res := CFA.ofAST prog_my_example
   match res with
   | .ok cfa =>
-    IO.println s!"Analyzing CFA:\n{repr cfa}\n"
+    -- This is the program we are working on
+    IO.println s!"Analyzing CFA:\n{cfa}\n"
+
+    -- This is syntactic analysis of reachable variables
     let res := Cpa.reachingDefinitions cfa
-    IO.println s!"Reaching Definitions:\n{repr res}\n"
+    IO.println s!"Reaching Definitions:\n{res}\n"
+
+    -- This is value analysis with constant propagation
     let res := Cpa.valueDataFlowAnalysis cfa
-    IO.println s!"Value DFA:\n{repr res}\n"
+    IO.println s!"Value DFA:\n{res}\n"
+
+    -- We can inform reaching definitions analysis using value analysis.
+    -- This allows us to figure out that because certain locations are not reachable, they
+    -- do not have reaching variable definitions
+    let res := Cpa.dataFlowAnalysis (d := Combined ReachedDefinitions ValueAssignment) cfa ⟨{}, {}⟩
+    IO.println s!"Reaching Definitions + Value DFA:\n{res}\n"
   | .error e => throw <| .userError s!"Error while constructing CFA: {e}"
 
 #eval main

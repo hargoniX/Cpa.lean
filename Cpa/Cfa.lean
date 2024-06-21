@@ -9,10 +9,20 @@ inductive Instruction where
 | nop
 deriving Repr, Hashable, DecidableEq, Inhabited
 
+instance : ToString Instruction where
+  toString instr :=
+    match instr with
+    | .assumption b => toString b
+    | .statement var aexp => s!"{var} := {aexp}"
+    | .nop => "nop"
+
 structure Edge where
   instr : Instruction
   target : Nat
 deriving Repr, Hashable, DecidableEq, Inhabited
+
+instance : ToString Edge where
+  toString edge := s!"- {edge.instr} -> l_{edge.target}"
 
 structure CFANode where
   isError : Bool
@@ -38,12 +48,23 @@ def addEdge (cfa : CFA) (entry : Nat) (instr : Instruction) (exit : Nat) : CFA :
           (fun node => { node with successors := node.successors.push ⟨instr, exit⟩ })
   }
 
-
 def getEdges (cfa : CFA) (idx : Nat) : Array Edge :=
   cfa.graph[idx]!.successors
 
 def isError (cfa : CFA) (idx : Nat) : Bool :=
   cfa.graph[idx]!.isError
+
+instance : ToString CFA where
+  toString cfa := Id.run do
+    let mut acc := []
+    for idx in [0:cfa.graph.size] do
+      let edges := cfa.getEdges idx
+      let errStr := if cfa.isError idx then "_ERR" else ""
+      let edgeStr := edges.map toString
+        |>.toList
+        |> String.intercalate ", "
+      acc := s!"(l_{idx}{errStr}, [{edgeStr}])" :: acc
+    return String.intercalate ", " acc.reverse
 
 namespace ofAST
 

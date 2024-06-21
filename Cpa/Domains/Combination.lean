@@ -24,4 +24,7 @@ instance [Transfer α] [Transfer β] : Transfer (Combined α β) where
     let rres ← Transfer.transfer c.right l e
     return ⟨lres, rres⟩
 
+instance [ToString α] [ToString β] : ToString (Combined α β) where
+  toString c := s!"({c.left}, {c.right})"
+
 end Domain

@@ -5,12 +5,28 @@ inductive AOp where
 | div
 deriving Repr, Hashable, DecidableEq
 
+instance : ToString AOp where
+  toString op :=
+    match op with
+    | .add => "+"
+    | .sub => "-"
+    | .mul => "*"
+    | .div => "/"
+
 inductive BOp where
 | eq
 | neq
 | lt
 | gt
 deriving Repr, Hashable, DecidableEq
+
+instance : ToString BOp where
+  toString op :=
+    match op with
+    | .eq => "=="
+    | .neq => "!="
+    | .lt => "<"
+    | .gt => ">"
 
 inductive AExp where
 | ident (x : String)
@@ -19,11 +35,37 @@ inductive AExp where
 | nondet
 deriving Repr, Hashable, DecidableEq
 
+def AExp.toString (exp : AExp) : String :=
+  match exp with
+  | .ident x => x
+  | .const val => s!"{val}"
+  | .bin lhs op rhs =>
+    let lstr := toString lhs
+    let rstr := toString rhs
+    s!"({lstr} {op} {rstr})"
+  | .nondet => s!"nondet()"
+
+instance : ToString AExp where
+  toString := AExp.toString
+
 inductive BExp where
 | const (b : Bool)
 | not (e : BExp)
 | bin (lhs : AExp) (op : BOp) (rhs : AExp)
 deriving Repr, Hashable, DecidableEq
+
+def BExp.toString (exp : BExp) : String :=
+  match exp with
+  | .const val => s!"{val}"
+  | .not e => s!"(!{toString e})"
+  | .bin lhs op rhs =>
+    let lstr := AExp.toString lhs
+    let rstr := AExp.toString rhs
+    s!"({lstr} {op} {rstr})"
+
+instance : ToString BExp where
+  toString := BExp.toString
+
 
 inductive Stmnt where
 | assign (x : String) (exp : AExp)

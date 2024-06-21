@@ -86,5 +86,8 @@ instance : Transfer ValueAssignment where
       | .val Bool.false => none
       | .top | .val Bool.true => return assign
     | .statement var aexp => assign.insert var (assign.evalAexp aexp)
-      
+
+instance : ToString ValueAssignment where
+  toString assign := assign.vars.fold (init := "[") (fun acc var val => acc ++ s!"{var} ↦ {val}, ") ++ "]"
+
 end Domain
